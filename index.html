@@ -12,7 +12,10 @@
 <meta name="apple-mobile-web-app-title" content="ERH M&E PM">
 <style>
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f4f8fc;font-family:Arial,sans-serif;color:#0b3a73;padding:18px}
+html,body{margin:0;min-height:100%}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f4f8fc;font-family:Arial,sans-serif;color:#0b3a73;padding:18px}
+body.launching .wrap{display:none}
+body.launching::after{content:"Đang mở ERH M&E PM...";font-size:16px;font-weight:700;color:#0b3a73}
 .wrap{width:min(94vw,460px);text-align:center}
 .logo{width:176px;height:176px;border-radius:36px;box-shadow:0 10px 30px rgba(0,70,160,.15)}
 h1{font-size:20px;margin:18px 0 8px}
@@ -39,16 +42,11 @@ button{padding:14px;border-radius:12px;font-weight:700;font-size:16px;cursor:poi
   <div class="note">Khi link ERH thay đổi, chỉ sửa TARGET_URL trong launcher-config.js</div>
 </main>
 <script src="./launcher-config.js"></script>
-<script src="./install.js"></script>
 <script>
 const cfg = window.LAUNCHER_CONFIG || {};
 document.title = cfg.SHORT_NAME || "ERH M&E PM";
 document.getElementById("appName").textContent = cfg.APP_NAME || "ERH KỸ THUẬT KHỐI – M&E PM";
-document.getElementById("openBtn").addEventListener("click", () => {
-  const u = (cfg.TARGET_URL || "").trim();
-  if (!u) return alert("Chưa cấu hình TARGET_URL");
-  location.href = u;
-});
 </script>
+<script src="./install.js"></script>
 </body>
 </html>
