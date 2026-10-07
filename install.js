@@ -1,98 +1,64 @@
 
-let deferredPrompt = null;
+(() => {
+  let deferredPrompt = null;
+  let ready = false;
+  const $ = id => document.getElementById(id);
 
-function isStandalone(){
-  return window.matchMedia("(display-mode: standalone)").matches ||
-         window.navigator.standalone === true;
-}
+  const standalone = () =>
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true;
 
-function detectDevice(){
-  const ua = navigator.userAgent || "";
-  const p = navigator.platform || "";
-  const ios = /iPhone|iPad|iPod/i.test(ua) || (p === "MacIntel" && navigator.maxTouchPoints > 1);
-  if (ios) return "ios";
-  if (/Android/i.test(ua)) return "android";
-  if (/Windows/i.test(ua)) return "windows";
-  if (/Macintosh|Mac OS X/i.test(ua)) return "mac";
-  return "other";
-}
-
-function showGuide(title, steps){
-  document.getElementById("guideTitle").textContent = title;
-  const ol = document.getElementById("guideSteps");
-  ol.innerHTML = "";
-  steps.forEach(x => {
-    const li = document.createElement("li");
-    li.textContent = x;
-    ol.appendChild(li);
-  });
-  document.getElementById("guide").hidden = false;
-}
-
-async function installApp(){
-  if (isStandalone()) {
-    alert("ERH M&E PM đã được cài trên thiết bị này.");
-    return;
+  function refresh() {
+    const btn = $("installBtn");
+    const st = $("installState");
+    if (standalone()) {
+      btn.textContent = "ĐÃ CÀI ỨNG DỤNG";
+      btn.disabled = true;
+      st.textContent = "Ứng dụng đã được cài.";
+      return;
+    }
+    btn.disabled = !ready;
+    btn.textContent = ready ? "CÀI ĐẶT ICON" : "ĐANG CHUẨN BỊ CÀI ĐẶT...";
+    st.textContent = ready ? "Sẵn sàng cài đặt." : "Đang chờ trình duyệt xác nhận ứng dụng có thể cài.";
   }
 
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
+  window.addEventListener("beforeinstallprompt", e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    ready = true;
+    refresh();
+  });
+
+  window.addEventListener("appinstalled", () => {
     deferredPrompt = null;
-    return;
-  }
-
-  const d = detectDevice();
-
-  if (d === "ios") {
-    showGuide("Cài trên iPhone / iPad", [
-      "Mở trang bằng Safari.",
-      "Bấm nút Chia sẻ.",
-      "Chọn “Thêm vào Màn hình chính”.",
-      "Bấm “Thêm”."
-    ]);
-  } else if (d === "android") {
-    showGuide("Cài trên Android", [
-      "Mở trang bằng Chrome hoặc Samsung Internet.",
-      "Mở menu trình duyệt.",
-      "Chọn “Cài đặt ứng dụng” hoặc “Thêm vào Màn hình chính”.",
-      "Xác nhận cài đặt."
-    ]);
-  } else {
-    showGuide("Cài trên máy tính", [
-      "Mở trang bằng Chrome hoặc Microsoft Edge.",
-      "Bấm biểu tượng Cài đặt ở thanh địa chỉ hoặc menu trình duyệt.",
-      "Chọn “Cài đặt ERH M&E PM”.",
-      "Xác nhận cài đặt."
-    ]);
-  }
-}
-
-window.addEventListener("beforeinstallprompt", e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  const btn = document.getElementById("installBtn");
-  if (btn) btn.textContent = "CÀI ĐẶT ICON";
-});
-
-window.addEventListener("appinstalled", () => {
-  const btn = document.getElementById("installBtn");
-  if (btn) {
-    btn.textContent = "ĐÃ CÀI ỨNG DỤNG";
-    btn.disabled = true;
-  }
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  const names = {ios:"iPhone / iPad", android:"Android", windows:"Windows", mac:"macOS", other:"Thiết bị hiện tại"};
-  document.getElementById("deviceInfo").textContent = "Đã nhận diện: " + names[detectDevice()];
-  if (isStandalone()) {
-    const btn = document.getElementById("installBtn");
-    btn.textContent = "ĐÃ CÀI ỨNG DỤNG";
-    btn.disabled = true;
-  }
-  document.getElementById("installBtn").addEventListener("click", installApp);
-  document.getElementById("closeGuide").addEventListener("click", () => {
-    document.getElementById("guide").hidden = true;
+    ready = false;
+    refresh();
   });
-});
+
+  async function installNow() {
+    if (!deferredPrompt) return;
+    const p = deferredPrompt;
+    deferredPrompt = null;
+    ready = false;
+    await p.prompt();
+    try { await p.userChoice; } catch(e) {}
+    refresh();
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    $("installBtn").addEventListener("click", installNow);
+    refresh();
+
+    if ("serviceWorker" in navigator) {
+      try {
+        await navigator.serviceWorker.register("./sw.js");
+        await navigator.serviceWorker.ready;
+        if (!navigator.serviceWorker.controller &&
+            !sessionStorage.getItem("erh_sw_reloaded")) {
+          sessionStorage.setItem("erh_sw_reloaded", "1");
+          location.reload();
+        }
+      } catch(e) {}
+    }
+  });
+})();

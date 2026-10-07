@@ -11,13 +11,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="ERH M&E PM">
 <style>
-*{box-sizing:border-box} body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f4f8fc;font-family:Arial,sans-serif;color:#0b3a73;padding:18px}
-.wrap{width:min(94vw,460px);text-align:center}.logo{width:176px;height:176px;border-radius:36px;box-shadow:0 10px 30px rgba(0,70,160,.15)}
-h1{font-size:20px;margin:18px 0 8px}.sub,.device{font-size:14px;color:#5f6f82}.device{margin:8px 0 18px}
-.actions{display:grid;gap:10px}button{padding:14px;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer}
-#installBtn{border:0;background:#0d6efd;color:white}#openBtn{background:white;color:#0d6efd;border:1px solid #0d6efd}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:18px}.modal[hidden]{display:none}
-.card{background:#fff;border-radius:18px;padding:22px;width:min(94vw,440px);text-align:left}.card h2{margin-top:0}.card button{width:100%;background:#0d6efd;color:white;border:0}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f4f8fc;font-family:Arial,sans-serif;color:#0b3a73;padding:18px}
+.wrap{width:min(94vw,460px);text-align:center}
+.logo{width:176px;height:176px;border-radius:36px;box-shadow:0 10px 30px rgba(0,70,160,.15)}
+h1{font-size:20px;margin:18px 0 8px}
+.sub{font-size:14px;color:#5f6f82;margin-bottom:18px}
+.actions{display:grid;gap:10px}
+button{padding:14px;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer}
+#installBtn{border:0;background:#0d6efd;color:#fff}
+#installBtn:disabled{opacity:.55;cursor:default}
+#openBtn{background:#fff;color:#0d6efd;border:1px solid #0d6efd}
+.state{font-size:13px;color:#64748b;margin-top:12px;min-height:18px}
 .note{font-size:12px;color:#7a8795;margin-top:12px}
 </style>
 </head>
@@ -25,23 +30,14 @@ h1{font-size:20px;margin:18px 0 8px}.sub,.device{font-size:14px;color:#5f6f82}.d
 <main class="wrap">
   <img class="logo" src="./icons/icon-512.png" alt="ERH M&E PM">
   <h1 id="appName">ERH KỸ THUẬT KHỐI – M&E PM</h1>
-  <div class="sub">Module cài Icon độc lập — không thay đổi mã nguồn ERH.</div>
-  <div id="deviceInfo" class="device">Đang nhận diện thiết bị...</div>
+  <div class="sub">Cài Icon ERH độc lập</div>
   <div class="actions">
-    <button id="installBtn">CÀI ĐẶT ICON</button>
+    <button id="installBtn" disabled>ĐANG CHUẨN BỊ CÀI ĐẶT...</button>
     <button id="openBtn">MỞ ỨNG DỤNG</button>
   </div>
+  <div id="installState" class="state"></div>
   <div class="note">Khi link ERH thay đổi, chỉ sửa TARGET_URL trong launcher-config.js</div>
 </main>
-
-<section id="guide" class="modal" hidden>
-  <div class="card">
-    <h2 id="guideTitle"></h2>
-    <ol id="guideSteps"></ol>
-    <button id="closeGuide">ĐÃ HIỂU</button>
-  </div>
-</section>
-
 <script src="./launcher-config.js"></script>
 <script src="./install.js"></script>
 <script>
@@ -51,9 +47,8 @@ document.getElementById("appName").textContent = cfg.APP_NAME || "ERH KỸ THU�
 document.getElementById("openBtn").addEventListener("click", () => {
   const u = (cfg.TARGET_URL || "").trim();
   if (!u) return alert("Chưa cấu hình TARGET_URL");
-  window.location.href = u;
+  location.href = u;
 });
-if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});
 </script>
 </body>
 </html>
