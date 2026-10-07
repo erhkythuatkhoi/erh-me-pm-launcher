@@ -1,0 +1,12 @@
+ERH ICON LAUNCHER V5
+- Dùng đúng mẫu cài PWA đã chạy ổn của app Ghi Chỉ Số Nước.
+- Bắt beforeinstallprompt ngay trong HEAD.
+- Chủ động kích hoạt Service Worker.
+- Tự reload 1 lần nếu chưa được SW control.
+- Không treo vô hạn.
+- Sau 5.5 giây nếu chưa có prompt sẽ tự tạo lại lượt cài.
+- Nếu vẫn chưa có prompt, nút chuyển thành THỬ TẠO ICON MỚI.
+- Cài xong tự mở ERH.
+- Bấm icon đã cài -> pwa-start.html -> chuyển thẳng ERH.
+- Không sửa app ERH.
+- Chỉ đổi TARGET_URL trong launcher-config.js khi link ERH thay đổi.

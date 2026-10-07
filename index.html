@@ -2,51 +2,152 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ERH M&E PM</title>
-<link rel="manifest" href="./manifest.json">
-<link rel="icon" href="./icons/favicon.png">
-<meta name="theme-color" content="#ffffff">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0d6efd">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="ERH M&E PM">
+<title>Cài ERH M&E PM</title>
+<script>
+(function(){
+  window.__erhPwaPrompt=null;
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault();
+    window.__erhPwaPrompt=e;
+    window.dispatchEvent(new Event('erh-pwa-prompt-ready'));
+  });
+})();
+</script>
+<link rel="manifest" href="./manifest.webmanifest?v=5">
+<link rel="icon" href="./icons/favicon.png">
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%}
-body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f4f8fc;font-family:Arial,sans-serif;color:#0b3a73;padding:18px}
-body.launching .wrap{display:none}
-body.launching::after{content:"Đang mở ERH M&E PM...";font-size:16px;font-weight:700;color:#0b3a73}
-.wrap{width:min(94vw,460px);text-align:center}
-.logo{width:176px;height:176px;border-radius:36px;box-shadow:0 10px 30px rgba(0,70,160,.15)}
-h1{font-size:20px;margin:18px 0 8px}
-.sub{font-size:14px;color:#5f6f82;margin-bottom:18px}
-.actions{display:grid;gap:10px}
-button{padding:14px;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer}
-#installBtn{border:0;background:#0d6efd;color:#fff}
-#installBtn:disabled{opacity:.55;cursor:default}
-#openBtn{background:#fff;color:#0d6efd;border:1px solid #0d6efd}
-.state{font-size:13px;color:#64748b;margin-top:12px;min-height:18px}
-.note{font-size:12px;color:#7a8795;margin-top:12px}
+html,body{margin:0;min-height:100%;background:#f4f8fc;color:#0b3a73;font-family:"Segoe UI",Tahoma,Arial,sans-serif}
+body{display:flex;align-items:center;justify-content:center;padding:18px}
+.card{width:min(430px,100%);background:#fff;border:1px solid #dce5ee;border-radius:22px;padding:22px 18px;box-shadow:0 16px 38px rgba(15,23,42,.10);text-align:center}
+.icon{width:120px;height:120px;display:block;margin:0 auto 14px;border-radius:26px}
+.title{font-size:22px;font-weight:900}
+.status{margin:14px 0 10px;padding:12px;border:1px solid #e0e7ef;border-radius:12px;background:#f8fafc;color:#52657a;font-size:14px;line-height:1.55;text-align:left}
+button,a.btn{display:block;width:100%;min-height:54px;border-radius:14px;border:1px solid #cfd9e4;padding:15px 12px;margin-top:10px;font:800 16px/1.2 "Segoe UI",Tahoma,Arial,sans-serif;text-decoration:none;cursor:pointer}
+#installBtn{background:#0d6efd;color:#fff;border-color:#0d6efd}
+#installBtn:disabled{opacity:.55;cursor:not-allowed}
+#openBtn{background:#fff;color:#0d6efd}
+.note{margin-top:12px;font-size:12px;color:#708196}
 </style>
 </head>
 <body>
-<main class="wrap">
-  <img class="logo" src="./icons/icon-512.png" alt="ERH M&E PM">
-  <h1 id="appName">ERH KỸ THUẬT KHỐI – M&E PM</h1>
-  <div class="sub">Cài Icon ERH độc lập</div>
-  <div class="actions">
-    <button id="installBtn" disabled>ĐANG CHUẨN BỊ CÀI ĐẶT...</button>
-    <button id="openBtn">MỞ ỨNG DỤNG</button>
-  </div>
-  <div id="installState" class="state"></div>
-  <div class="note">Khi link ERH thay đổi, chỉ sửa TARGET_URL trong launcher-config.js</div>
-</main>
+<div class="card">
+  <img class="icon" src="./icons/icon-512.png" alt="ERH M&E PM">
+  <div class="title">ERH KỸ THUẬT KHỐI – M&E PM</div>
+  <div id="status" class="status">Đang chuẩn bị hộp cài...</div>
+  <button id="installBtn" type="button" disabled>CÀI ĐẶT ICON</button>
+  <a id="openBtn" class="btn" href="#">MỞ ỨNG DỤNG</a>
+  <div class="note">Module cài icon độc lập – không sửa app ERH.</div>
+</div>
 <script src="./launcher-config.js"></script>
 <script>
-const cfg = window.LAUNCHER_CONFIG || {};
-document.title = cfg.SHORT_NAME || "ERH M&E PM";
-document.getElementById("appName").textContent = cfg.APP_NAME || "ERH KỸ THUẬT KHỐI – M&E PM";
+(function(){
+const cfg=window.LAUNCHER_CONFIG||{};
+const status=document.getElementById('status');
+const btn=document.getElementById('installBtn');
+const openBtn=document.getElementById('openBtn');
+const target=String(cfg.TARGET_URL||'').trim();
+const p=new URLSearchParams(location.search);
+const attempt=Math.max(0,parseInt(p.get('attempt')||'0',10)||0);
+let promptEvent=window.__erhPwaPrompt||null,done=false;
+openBtn.href=target||'#';
+
+function activatePrompt(){
+  if(window.__erhPwaPrompt) promptEvent=window.__erhPwaPrompt;
+  if(!promptEvent) return false;
+  btn.disabled=false;
+  btn.textContent='CÀI ĐẶT ICON';
+  status.textContent='Sẵn sàng cài đặt. Bấm CÀI ĐẶT ICON.';
+  return true;
+}
+function finish(){
+  if(done)return;
+  done=true;
+  try{localStorage.setItem('erh_pwa_installed','1');}catch(e){}
+  btn.disabled=true;
+  status.textContent='Đã cài Icon thành công. Đang mở ERH...';
+  setTimeout(()=>{if(target)location.replace(target);},900);
+}
+function retryInstaller(){
+  const q=new URLSearchParams(location.search);
+  q.set('attempt',String(attempt+1));
+  q.set('_t',String(Date.now()));
+  location.replace(location.pathname+'?'+q.toString());
+}
+window.addEventListener('erh-pwa-prompt-ready',activatePrompt);
+window.addEventListener('appinstalled',finish);
+
+async function ensureControlled(){
+  if(!('serviceWorker' in navigator)){
+    status.textContent='Trình duyệt này không hỗ trợ cài ứng dụng PWA.';
+    btn.disabled=false; btn.textContent='MỞ ỨNG DỤNG';
+    btn.onclick=()=>{if(target)location.href=target;};
+    return;
+  }
+  try{
+    const reg=await navigator.serviceWorker.register('./sw-pwa.js?v=5',{scope:'./',updateViaCache:'none'});
+    try{await Promise.race([reg.update(),new Promise(r=>setTimeout(r,3000))]);}catch(e){}
+    if(reg.waiting){try{reg.waiting.postMessage({type:'SKIP_WAITING'});}catch(e){}}
+    await Promise.race([navigator.serviceWorker.ready,new Promise(r=>setTimeout(r,5000))]);
+    if(!navigator.serviceWorker.controller){
+      if(p.get('_ctrl')!=='1'){
+        p.set('_ctrl','1');
+        location.replace(location.pathname+'?'+p.toString());
+        return;
+      }
+      status.textContent='Bộ cài chưa sẵn sàng. Bấm THỬ LẠI.';
+      btn.disabled=false; btn.textContent='THỬ LẠI';
+      return;
+    }
+    activatePrompt();
+  }catch(e){
+    status.textContent='Không kích hoạt được bộ cài. Bấm THỬ LẠI.';
+    btn.disabled=false; btn.textContent='THỬ LẠI';
+  }
+}
+
+activatePrompt();
+ensureControlled();
+
+setTimeout(function(){
+  if(promptEvent||done)return;
+  if(attempt<1){
+    status.textContent='Đang tự tạo lại lượt cài...';
+    retryInstaller();
+    return;
+  }
+  btn.disabled=false;
+  btn.textContent='THỬ TẠO ICON MỚI';
+  status.textContent='Chrome chưa mở hộp cài. Bấm THỬ TẠO ICON MỚI.';
+},5500);
+
+btn.addEventListener('click',async function(){
+  if(btn.textContent==='THỬ LẠI'||btn.textContent==='THỬ TẠO ICON MỚI'){
+    retryInstaller(); return;
+  }
+  activatePrompt();
+  if(!promptEvent){retryInstaller();return;}
+  const e=promptEvent;
+  promptEvent=null; window.__erhPwaPrompt=null;
+  try{
+    await e.prompt();
+    const c=await e.userChoice;
+    if(c&&c.outcome==='accepted'){
+      btn.disabled=true;
+      status.textContent='Đã xác nhận cài đặt. Đang tạo Icon...';
+      setTimeout(()=>{if(!done)finish();},3000);
+    }else{
+      btn.disabled=false;
+      status.textContent='Bạn đã hủy cài đặt.';
+    }
+  }catch(err){retryInstaller();}
+});
+})();
 </script>
-<script src="./install.js"></script>
 </body>
 </html>

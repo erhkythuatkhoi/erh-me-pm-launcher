@@ -1,0 +1,26 @@
+{
+  "id": "./pwa-start.html",
+  "name": "ERH KỸ THUẬT KHỐI – M&E PM",
+  "short_name": "ERH M&E PM",
+  "description": "ERH KỸ THUẬT KHỐI – M&E PM",
+  "start_url": "./pwa-start.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f8fc",
+  "theme_color": "#0d6efd",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
